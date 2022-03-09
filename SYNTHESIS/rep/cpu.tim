@@ -1,0 +1,87 @@
+ 
+****************************************
+Report : timing
+        -path full
+        -delay max
+        -max_paths 1
+Design : cpu
+Version: N-2017.09-SP3
+Date   : Wed Mar  9 11:01:37 2022
+****************************************
+
+ # A fanout number of 1000 was used for high fanout net computations.
+
+Operating Conditions: tt1p05v25c   Library: saed32sram_tt1p05v25c
+Wire Load Model Mode: enclosed
+
+  Startpoint: program_counter/pc_register/r_reg_9_
+              (rising edge-triggered flip-flop clocked by clk)
+  Endpoint: register_file/reg_array_reg_1__3_
+            (rising edge-triggered flip-flop clocked by clk)
+  Path Group: clk
+  Path Type: max
+
+  Des/Clust/Port     Wire Load Model       Library
+  ------------------------------------------------
+  reg_arstn_en_64_s00000000
+                     ForQA                 saed32sram_tt1p05v25c
+  cpu                540000                saed32sram_tt1p05v25c
+  sram_BW32_ADDR_W9_DATA_W32
+                     140000                saed32sram_tt1p05v25c
+  control_unit       ForQA                 saed32sram_tt1p05v25c
+  alu_DATA_W64       8000                  saed32sram_tt1p05v25c
+
+  Point                                                   Incr       Path
+  --------------------------------------------------------------------------
+  clock clk (rise edge)                                   0.00       0.00
+  clock network delay (ideal)                             0.00       0.00
+  program_counter/pc_register/r_reg_9_/CLK (DFFARX1_RVT)
+                                                          0.00       0.00 r
+  program_counter/pc_register/r_reg_9_/Q (DFFARX1_RVT)
+                                                          0.15       0.15 f
+  program_counter/pc_register/dout[9] (reg_arstn_en_64_s00000000)
+                                                          0.00       0.15 f
+  program_counter/current_pc[9] (pc_DATA_W64)             0.00       0.15 f
+  instruction_memory/addr[9] (sram_BW32_ADDR_W9_DATA_W32)
+                                                          0.00       0.15 f
+  instruction_memory/U42/Y (NAND2X0_RVT)                  1.14       1.29 r
+  instruction_memory/U38/Y (INVX0_RVT)                    0.62       1.92 f
+  instruction_memory/U17/Y (AO22X1_RVT)                   3.63       5.55 f
+  instruction_memory/U80/Y (OR2X1_RVT)                    0.71       6.27 f
+  instruction_memory/rdata[1] (sram_BW32_ADDR_W9_DATA_W32)
+                                                          0.00       6.27 f
+  control_unit/opcode[1] (control_unit)                   0.00       6.27 f
+  control_unit/U9/Y (NAND2X0_RVT)                         0.82       7.09 r
+  control_unit/U12/Y (NOR4X1_RVT)                         0.09       7.18 f
+  control_unit/U4/Y (OA21X1_RVT)                          0.66       7.84 f
+  control_unit/alu_src (control_unit)                     0.00       7.84 f
+  alu_operand_mux/select_a (mux_2_DATA_W64_3)             0.00       7.84 f
+  alu_operand_mux/U6/Y (AO22X1_RVT)                       8.11      15.95 f
+  alu_operand_mux/mux_out[2] (mux_2_DATA_W64_3)           0.00      15.95 f
+  alu/alu_in_1[2] (alu_DATA_W64)                          0.00      15.95 f
+  alu/U85/Y (MUX41X1_RVT)                                40.50      56.45 r
+  alu/U71/Y (AO22X1_RVT)                                  0.06      56.51 r
+  alu/U1170/Y (OA22X1_RVT)                                0.05      56.56 r
+  alu/U1180/Y (NAND4X0_RVT)                               0.11      56.67 f
+  alu/alu_out[3] (alu_DATA_W64)                           0.00      56.67 f
+  regfile_data_mux/input_b[3] (mux_2_DATA_W64_2)          0.00      56.67 f
+  regfile_data_mux/U52/Y (AO22X1_RVT)                     3.64      60.31 f
+  regfile_data_mux/mux_out[3] (mux_2_DATA_W64_2)          0.00      60.31 f
+  register_file/wdata[3] (register_file_DATA_W64)         0.00      60.31 f
+  register_file/reg_array_reg_1__3_/D (DFFARX1_RVT)       5.41      65.72 f
+  data arrival time                                                 65.72
+
+  clock clk (rise edge)                                 100.00     100.00
+  clock network delay (ideal)                             0.00     100.00
+  clock uncertainty                                      -0.10      99.90
+  register_file/reg_array_reg_1__3_/CLK (DFFARX1_RVT)     0.00      99.90 r
+  library setup time                                     -0.10      99.80
+  data required time                                                99.80
+  --------------------------------------------------------------------------
+  data required time                                                99.80
+  data arrival time                                                -65.72
+  --------------------------------------------------------------------------
+  slack (MET)                                                       34.08
+
+
+1
