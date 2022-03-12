@@ -38,8 +38,8 @@ module control_unit(
             reg_write = 1'b1;
             mem_read  = 1'b0;
             mem_write = 1'b0;
-            branch    = 1'b0;
-            alu_op    = R_TYPE_OPCODE;
+            branch    = 1'b0;            
+	    alu_op    = R_TYPE_OPCODE;
             jump      = 1'b0;
          end
 

@@ -1,5 +1,5 @@
 ncverilog(64): 15.20-s058: (c) Copyright 1995-2018 Cadence Design Systems, Inc.
-TOOL:	ncverilog	15.20-s058: Started on Mar 09, 2022 at 10:58:32 CET
+TOOL:	ncverilog	15.20-s058: Started on Mar 12, 2022 at 18:23:46 CET
 ncverilog
 	+sv
 	-f files_verilog.f
@@ -26,10 +26,10 @@ ncsim: *W,DSEM2009: This SystemVerilog design is simulated as per IEEE 1800-2009
 ncsim> source /esat/micas-data/software/Cadence/incisiv_15.20.058/tools/inca/files/ncsimrc
 ncsim> run
 [1;34m
-Mult1 Working Correctly
+Mult2 Working Correctly
 [0m
-       2300 cycles
-Simulation complete via $finish(1) at time 386450 NS + 7
+         40 cycles
+Simulation complete via $finish(1) at time 160450 NS + 7
 ../RTL/cpu_tb.v:319    $finish;
 ncsim> exit
-TOOL:	ncverilog	15.20-s058: Exiting on Mar 09, 2022 at 10:58:34 CET  (total: 00:00:02)
+TOOL:	ncverilog	15.20-s058: Exiting on Mar 12, 2022 at 18:23:47 CET  (total: 00:00:01)
