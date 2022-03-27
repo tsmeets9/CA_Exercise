@@ -2,7 +2,7 @@
 1647105130 /users/students/r0755727/Documents/Computer_Architectures/CA_Exercise/RTL/alu_control.v
 1647101130 /users/students/r0755727/Documents/Computer_Architectures/CA_Exercise/RTL/branch_unit.v
 1647101130 /users/students/r0755727/Documents/Computer_Architectures/CA_Exercise/RTL/control_unit.v
-1647104850 /users/students/r0755727/Documents/Computer_Architectures/CA_Exercise/RTL/cpu.v
+1648370087 /users/students/r0755727/Documents/Computer_Architectures/CA_Exercise/RTL/cpu.v
 1647101131 /users/students/r0755727/Documents/Computer_Architectures/CA_Exercise/RTL/immediate_extend_unit.v
 1647101131 /users/students/r0755727/Documents/Computer_Architectures/CA_Exercise/RTL/mux_2.v
 1647101131 /users/students/r0755727/Documents/Computer_Architectures/CA_Exercise/RTL/pc.v
