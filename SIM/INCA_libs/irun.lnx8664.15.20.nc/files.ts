@@ -2,7 +2,7 @@
 1647105130 /users/students/r0755727/Documents/Computer_Architectures/CA_Exercise/RTL/alu_control.v
 1647101130 /users/students/r0755727/Documents/Computer_Architectures/CA_Exercise/RTL/branch_unit.v
 1647101130 /users/students/r0755727/Documents/Computer_Architectures/CA_Exercise/RTL/control_unit.v
-1648395255 /users/students/r0755727/Documents/Computer_Architectures/CA_Exercise/RTL/cpu.v
+1648486654 /users/students/r0755727/Documents/Computer_Architectures/CA_Exercise/RTL/cpu.v
 1647101131 /users/students/r0755727/Documents/Computer_Architectures/CA_Exercise/RTL/immediate_extend_unit.v
 1647101131 /users/students/r0755727/Documents/Computer_Architectures/CA_Exercise/RTL/mux_2.v
 1647101131 /users/students/r0755727/Documents/Computer_Architectures/CA_Exercise/RTL/pc.v
@@ -12,3 +12,5 @@
 1647101131 /users/students/r0755727/Documents/Computer_Architectures/CA_Exercise/RTL/sram.v
 1647101131 /users/students/r0755727/Documents/Computer_Architectures/CA_Exercise/RTL/cpu_tb.v
 1647101131 /users/students/r0755727/Documents/Computer_Architectures/CA_Exercise/RTL/saed32sram_mod.v
+1648412847 /users/students/r0755727/Documents/Computer_Architectures/CA_Exercise/RTL/mux_3.v
+1648414054 /users/students/r0755727/Documents/Computer_Architectures/CA_Exercise/RTL/forward_unit.v

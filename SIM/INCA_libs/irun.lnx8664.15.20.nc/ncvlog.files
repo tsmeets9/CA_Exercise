@@ -9,6 +9,8 @@
 /users/students/r0755727/Documents/Computer_Architectures/CA_Exercise/RTL/cpu.v
 /users/students/r0755727/Documents/Computer_Architectures/CA_Exercise/RTL/immediate_extend_unit.v
 /users/students/r0755727/Documents/Computer_Architectures/CA_Exercise/RTL/mux_2.v
+/users/students/r0755727/Documents/Computer_Architectures/CA_Exercise/RTL/mux_3.v
+/users/students/r0755727/Documents/Computer_Architectures/CA_Exercise/RTL/forward_unit.v
 /users/students/r0755727/Documents/Computer_Architectures/CA_Exercise/RTL/pc.v
 /users/students/r0755727/Documents/Computer_Architectures/CA_Exercise/RTL/reg_arstn.v
 /users/students/r0755727/Documents/Computer_Architectures/CA_Exercise/RTL/reg_arstn_en.v

@@ -51,10 +51,14 @@ wire [      63:0] regfile_wdata,mem_data,alu_out,
                   alu_operand_2;
 
 wire signed [63:0] immediate_extended;
+wire [4:0] instruction_11_7_EX_MEM;
 wire [4:0] instruction_11_7_MEM_WB;
+wire reg_write_EX_MEM;
 wire reg_write_MEM_WB;
 wire [63:0] branch_pc_EX_MEM;
 wire [63:0] jump_pc_EX_MEM;
+wire [63:0] alu_out_EX_MEM;
+
 
 
 
@@ -169,7 +173,31 @@ reg_arstn_en#(
    .en      (enable        ),
    .dout   (updated_pc_ID_EX)
 );
-// ID_EX Pipeline registers for Control Unit
+
+// ID_EX Pipeline register for instruction_24_20
+wire [4:0] instruction_24_20_ID_EX;
+reg_arstn_en#(
+   .DATA_W(5) // width of the forwarded signal
+)signal_pipe_instruction_24_20_ID_EX(
+   .clk     (clk           ),
+   .arst_n  (arst_n        ),
+   .din     (instruction_IF_ID[24:20]   ),
+   .en      (enable        ),
+   .dout   (instruction_24_20_ID_EX)
+);
+
+// ID_EX Pipeline register for instruction_19_15
+wire [4:0] instruction_19_15_ID_EX;
+reg_arstn_en#(
+   .DATA_W(5) // width of the forwarded signal
+)signal_pipe_instruction_19_15_ID_EX(
+   .clk     (clk           ),
+   .arst_n  (arst_n        ),
+   .din     (instruction_IF_ID[19:15]   ),
+   .en      (enable        ),
+   .dout   (instruction_19_15_ID_EX)
+);
+
 // ID_EX Pipeline register for instruction_11_7
 wire [4:0] instruction_11_7_ID_EX;
 reg_arstn_en#(
@@ -361,6 +389,22 @@ reg_arstn_en#(
 //// ID_EX_REG END
 //// EX STAGE BEGIN
 
+wire [1:0] Forward_1;
+wire [1:0] Forward2;
+wire [63:0] mux_1_out;
+wire [63:0] mux_2_out;
+
+forward_unit forward_unit(
+   .Rs1 (instruction_19_15_ID_EX),
+   .Rs2 (instruction_24_20_ID_EX   ),
+   .Rd_EX_MEM (instruction_11_7_EX_MEM     ),
+   .Rd_MEM_WB  (instruction_11_7_MEM_WB         ),
+   .RegWrite_EX_MEM(reg_write_EX_MEM       ),
+   .RegWrite_MEM_WB  (reg_write_MEM_WB         ),
+   .Forward1(Forward_1       ),
+   .Forward2 (Forward_2      )
+);
+
 mux_2 #(
    .DATA_W(64)
 ) alu_operand_mux (
@@ -370,11 +414,31 @@ mux_2 #(
    .mux_out (alu_operand_2     )
 );
 
+mux_3 #(
+   .DATA_W(64)
+) alu_operand_1_mux (
+   .input_a (regfile_rdata_1_ID_EX),
+   .input_b (alu_out_EX_MEM),
+   .input_c (regfile_wdata),
+   .select_a(Forward_1),
+   .mux_out (mux_1_out)
+);
+
+mux_3 #(
+   .DATA_W(64)
+) alu_operand_2_mux (
+   .input_a (alu_operand_2),
+   .input_b (alu_out_EX_MEM),
+   .input_c (regfile_wdata),
+   .select_a(Forward_2           ),
+   .mux_out (mux_2_out     )
+);
+
 alu#(
    .DATA_W(64)
 ) alu(
-   .alu_in_0 (regfile_rdata_1_ID_EX),
-   .alu_in_1 (alu_operand_2   ),
+   .alu_in_0 (mux_1_out),
+   .alu_in_1 (mux_2_out   ),
    .alu_ctrl (alu_control     ),
    .alu_out  (alu_out         ),
    .zero_flag(zero_flag       ),
@@ -384,9 +448,9 @@ alu#(
 alu_control alu_ctrl(
    .func7_5       (instruction_30_ID_EX   ),
    .func7_0       (instruction_25_ID_EX   ),
-   .func3          (instruction_14_12_ID_EX),
-   .alu_op         (alu_op_ID_EX            ),
-   .alu_control    (alu_control       )
+   .func3         (instruction_14_12_ID_EX),
+   .alu_op        (alu_op_ID_EX            ),
+   .alu_control   (alu_control       )
 );
 
 branch_unit#(
@@ -403,7 +467,6 @@ branch_unit#(
 //// EX_MEM_REG BEGIN
 
 // EX_MEM Pipeline register for instruction_11_7
-wire [4:0] instruction_11_7_EX_MEM;
 reg_arstn_en#(
    .DATA_W(5) // width of the forwarded signal
 )signal_pipe_instruction_11_7_EX_MEM(
@@ -427,7 +490,6 @@ reg_arstn_en#(
 );
 
 // EX_MEM Pipeline register for alu_out
-wire [63:0] alu_out_EX_MEM;
 reg_arstn_en#(
    .DATA_W(64) // width of the forwarded signal
 )signal_pipe_regfile_alu_out_EX_MEM(
@@ -449,7 +511,7 @@ reg_arstn_en#(
    .dout   (branch_pc_EX_MEM)
 );
 
-// EX_MEM Pipeline register for alu_out
+// EX_MEM Pipeline register for jump_pc
 reg_arstn_en#(
    .DATA_W(64) // width of the forwarded signal
 )signal_pipe_jump_pc_EX_MEM(
@@ -485,7 +547,6 @@ reg_arstn_en#(
 );
 
 // EX_MEM Pipeline register for reg_write
-wire reg_write_EX_MEM;
 reg_arstn_en#(
    .DATA_W(1) // width of the forwarded signal
 )signal_pipe_reg_write_EX_MEM(
@@ -633,7 +694,7 @@ mux_2 #(
    .input_a  (mem_data_MEM_WB     ),
    .input_b  (alu_out_MEM_WB      ),
    .select_a (mem_2_reg_MEM_WB    ),
-   .mux_out  (regfile_wdata)
+   .mux_out  ( regfile_wdata )
 );
 
 //// WB STAGE END
