@@ -73,6 +73,7 @@ pc #(
    .zero_flag (zero_flag ),
    .branch    (branch    ),
    .jump      (jump      ),
+   .PCWrite   (PCWrite),
    .current_pc(current_pc),
    .enable    (enable    ),
    .updated_pc(updated_pc)
@@ -108,8 +109,8 @@ reg_arstn_en#(
    .clk     (clk           ),
    .arst_n  (arst_n        ),
    .din     (instruction   ),
-   .en      (enable        ),
-   .dout   (instruction_IF_ID)
+   .en      (enable & (!Write_IF_ID)       ),
+   .dout   (instruction_IF_ID & (!Write_IF_ID))
 );
 
 // IF_ID Pipeline register for updated_pc
@@ -156,6 +157,41 @@ control_unit control_unit(
 immediate_extend_unit immediate_extend_u(
     .instruction         (instruction_IF_ID),
     .immediate_extended  (immediate_extended)
+);
+
+wire Stall;
+wire PCWrite;
+wire Write_IF_ID;
+
+hazard_detection_unit(
+   .Rs1 (instruction_19_15_ID_EX),
+   .Rs2 (instruction_24_20_ID_EX),
+   .Rd_ID_EX (instruction_11_7_ID_EX),
+   .MemRead_ID_EX (mem_read_ID_EX),
+   .Stall (Stall),
+   .PCWrite (PCWrite),
+   .Write_IF_ID (Write_IF_ID)
+);
+wire [9:0] control_signals;
+assign wire jump1 = control_signals[9];
+assign wire reg_write1 = control_signals[8];
+assign wire alu_src1 = control_signals[7];
+assign wire mem_write1 = control_signals[6];
+assign wire mem_2_reg1 = control_signals[5];
+assign wire mem_read1 = control_signals[4];
+assign wire branch1 = control_signals[3];
+assign wire reg_dst1 = control_signals[2];
+assign wire [1:0] alu_op1 = control_signals[1:0];
+
+mux_2 #(
+   .DATA_W(10)
+) regfile_data_mux (
+   .input_a  ( 10'b0 ),
+   .input_b  ({jump, reg_write, alu_src, 
+               mem_write, mem_2_reg, mem_read, 
+               branch, reg_dst, alu_op}      ),
+   .select_a (Stall    ),
+   .mux_out  ( control_signals )
 );
 
 // ID STAGE END
@@ -287,7 +323,7 @@ reg_arstn_en#(
 )signal_pipe_jump_ID_EX(
    .clk     (clk           ),
    .arst_n  (arst_n        ),
-   .din     (jump),
+   .din     (jump1),
    .en      (enable        ),
    .dout   (jump_ID_EX)
 );
@@ -299,7 +335,7 @@ reg_arstn_en#(
 )signal_pipe_reg_write_ID_EX(
    .clk     (clk           ),
    .arst_n  (arst_n        ),
-   .din     (reg_write),
+   .din     (reg_write1),
    .en      (enable        ),
    .dout   (reg_write_ID_EX)
 );
@@ -311,7 +347,7 @@ reg_arstn_en#(
 )signal_pipe_alu_src_ID_EX(
    .clk     (clk           ),
    .arst_n  (arst_n        ),
-   .din     (alu_src),
+   .din     (alu_src1),
    .en      (enable        ),
    .dout   (alu_src_ID_EX)
 );
@@ -323,7 +359,7 @@ reg_arstn_en#(
 )signal_pipe_mem_write_ID_EX(
    .clk     (clk           ),
    .arst_n  (arst_n        ),
-   .din     (mem_write),
+   .din     (mem_write1),
    .en      (enable        ),
    .dout   (mem_write_ID_EX)
 );
@@ -335,7 +371,7 @@ reg_arstn_en#(
 )signal_pipe_mem_2_reg_ID_EX(
    .clk     (clk           ),
    .arst_n  (arst_n        ),
-   .din     (mem_2_reg),
+   .din     (mem_2_reg1),
    .en      (enable        ),
    .dout   (mem_2_reg_ID_EX)
 );
@@ -347,7 +383,7 @@ reg_arstn_en#(
 )signal_pipe_mem_read_ID_EX(
    .clk     (clk           ),
    .arst_n  (arst_n        ),
-   .din     (mem_read),
+   .din     (mem_read1),
    .en      (enable        ),
    .dout   (mem_read_ID_EX)
 );
@@ -358,7 +394,7 @@ reg_arstn_en#(
 )signal_pipe_branch_ID_EX(
    .clk     (clk           ),
    .arst_n  (arst_n        ),
-   .din     (branch),
+   .din     (branch1),
    .en      (enable        ),
    .dout   (branch_ID_EX)
 );
@@ -370,7 +406,7 @@ reg_arstn_en#(
 )signal_pipe_reg_dst_ID_EX(
    .clk     (clk           ),
    .arst_n  (arst_n        ),
-   .din     (reg_dst),
+   .din     (reg_dst1),
    .en      (enable        ),
    .dout   (reg_dst_ID_EX)
 );
@@ -382,7 +418,7 @@ reg_arstn_en#(
 )signal_pipe_alu_op_ID_EX(
    .clk     (clk           ),
    .arst_n  (arst_n        ),
-   .din     (alu_op),
+   .din     (alu_op1),
    .en      (enable        ),
    .dout   (alu_op_ID_EX)
 );

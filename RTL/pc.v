@@ -25,6 +25,7 @@ module pc#(
       input  wire              zero_flag,
       input  wire              branch,
       input  wire              jump,
+      input  wire              PCWrite,   
       output reg  [DATA_W-1:0] updated_pc,
       output reg  [DATA_W-1:0] current_pc
    );
@@ -65,7 +66,7 @@ module pc#(
       .clk   (clk       ),
       .arst_n(arst_n    ),
       .din   (next_pc   ),
-      .en    (enable    ),
+      .en    (enable & (!PCWrite)),
       .dout  (current_pc)
    );
 
