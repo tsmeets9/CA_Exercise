@@ -1,5 +1,5 @@
 ncverilog(64): 15.20-s058: (c) Copyright 1995-2018 Cadence Design Systems, Inc.
-TOOL:	ncverilog	15.20-s058: Started on Mar 28, 2022 at 19:07:57 CEST
+TOOL:	ncverilog	15.20-s058: Started on Mar 30, 2022 at 09:16:58 CEST
 ncverilog
 	+sv
 	-f files_verilog.f
@@ -8214,8 +8214,8 @@ ncelab: *W,CUVMPW (../RTL/cpu.v,433|21): port sizes differ in port connection (1
 			streams:   3, words:   437
 		worklib.cpu_tb:v <0x23782d93>
 			streams:  27, words: 53186
-		worklib.forward_unit:v <0x67693454>
-			streams:   1, words:  6169
+		worklib.forward_unit:v <0x5199a48a>
+			streams:   3, words:  2646
 		worklib.immediate_extend_unit:v <0x39ffa5c3>
 			streams:   3, words:  3232
 		worklib.mux_2:v <0x69a21794>
@@ -8254,13 +8254,13 @@ ncelab: *W,CUVMPW (../RTL/cpu.v,433|21): port sizes differ in port connection (1
 		                   Instances  Unique
 		Modules:                1813      86
 		Primitives:             5220       1
-		Registers:              7096     236
+		Registers:              7098     238
 		Scalar wires:          12317       -
 		Expanded wires:         1314      42
 		Vectored wires:          146       -
 		Always blocks:          6685     192
 		Initial blocks:            3       3
-		Cont. assignments:         4       5
+		Cont. assignments:         6       7
 		Pseudo assignments:     5405     149
 		Simulation timescale:  100fs
 	Writing initial simulation snapshot: worklib.reg_arstn:v
@@ -8275,4 +8275,4 @@ Mult3 Working Correctly
 Simulation complete via $finish(1) at time 158950 NS + 7
 ../RTL/cpu_tb.v:319    $finish;
 ncsim> exit
-TOOL:	ncverilog	15.20-s058: Exiting on Mar 28, 2022 at 19:08:04 CEST  (total: 00:00:07)
+TOOL:	ncverilog	15.20-s058: Exiting on Mar 30, 2022 at 09:16:59 CEST  (total: 00:00:01)

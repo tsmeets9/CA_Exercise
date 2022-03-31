@@ -15,7 +15,7 @@ set id [waveform add -signals [subst  {
 	{[format {cpu_tb.dut.Forward_1[1:0]}]}
 	} ]]
 set id [waveform add -signals [subst  {
-	{[format {cpu_tb.dut.Forward_2[1:0]}]}
+	{[format {cpu_tb.dut.Forward2[1:0]}]}
 	} ]]
 set id [waveform add -signals [subst  {
 	{[format {cpu_tb.dut.clk}]}
