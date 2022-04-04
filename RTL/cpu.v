@@ -37,8 +37,8 @@ module cpu(
 		output wire	[63:0]  rdata_ext_2
 
    );
-
 wire              zero_flag;
+wire              zero_flag_old;
 wire [      63:0] branch_pc,updated_pc,current_pc,jump_pc;
 wire [      31:0] instruction;
 wire [       1:0] alu_op;
@@ -51,14 +51,20 @@ wire [      63:0] regfile_wdata,mem_data,alu_out,
                   alu_operand_2;
 
 wire signed [63:0] immediate_extended;
+wire [4:0] instruction_11_7_ID_EX;
 wire [4:0] instruction_11_7_EX_MEM;
 wire [4:0] instruction_11_7_MEM_WB;
 wire reg_write_EX_MEM;
 wire reg_write_MEM_WB;
+wire mem_read_ID_EX;
 wire [63:0] branch_pc_EX_MEM;
 wire [63:0] jump_pc_EX_MEM;
 wire [63:0] alu_out_EX_MEM;
 
+
+wire Stall;
+wire PCWrite;
+wire Write_IF_ID;
 
 
 
@@ -68,8 +74,8 @@ pc #(
 ) program_counter (
    .clk       (clk       ),
    .arst_n    (arst_n    ),
-   .branch_pc (branch_pc_EX_MEM ),
-   .jump_pc   (jump_pc_EX_MEM   ),
+   .branch_pc (branch_pc),
+   .jump_pc   (jump_pc),
    .zero_flag (zero_flag ),
    .branch    (branch    ),
    .jump      (jump      ),
@@ -97,6 +103,15 @@ sram_BW32 #(
    .rdata_ext(rdata_ext     )
 );
 
+wire [31:0] instruction1;
+mux_2 #(
+  .DATA_W(32)
+) instruction_mux (
+  .input_a (32'h00000000),
+  .input_b (instruction),
+  .select_a ((branch & zero_flag) | jump),
+  .mux_out (instruction1     )
+);
 //// IF STAGE END
 
 //// IF_ID REG BEGIN
@@ -108,9 +123,9 @@ reg_arstn_en#(
 )signal_pipe_instruction_IF_ID(
    .clk     (clk           ),
    .arst_n  (arst_n        ),
-   .din     (instruction   ),
-   .en      (enable & (!Write_IF_ID)       ),
-   .dout   (instruction_IF_ID & (!Write_IF_ID))
+   .din     (instruction1   ),
+   .en      (enable & (!Write_IF_ID)),
+   .dout   (instruction_IF_ID)
 );
 
 // IF_ID Pipeline register for updated_pc
@@ -121,7 +136,7 @@ reg_arstn_en#(
    .clk     (clk           ),
    .arst_n  (arst_n        ),
    .din     (updated_pc   ),
-   .en      (enable        ),
+   .en      (enable  & (!Write_IF_ID)),
    .dout   (updated_pc_IF_ID)
 );
 // IF_ID REG END
@@ -139,6 +154,14 @@ register_file #(
    .wdata    (regfile_wdata     ),
    .rdata_1  (regfile_rdata_1   ),
    .rdata_2  (regfile_rdata_2   )
+);
+
+branch_taken #(
+   .DATA_W(64)
+) branch_taken(
+   .input_a (regfile_rdata_1),
+   .input_b (regfile_rdata_2),
+   .out (zero_flag)
 );
 
 control_unit control_unit(
@@ -159,39 +182,55 @@ immediate_extend_unit immediate_extend_u(
     .immediate_extended  (immediate_extended)
 );
 
-wire Stall;
-wire PCWrite;
-wire Write_IF_ID;
-
-hazard_detection_unit(
-   .Rs1 (instruction_19_15_ID_EX),
-   .Rs2 (instruction_24_20_ID_EX),
+hazard_detection_unit hazard_detection_unit(
+   .Rs1 (instruction_IF_ID[19:15]),
+   .Rs2 (instruction_IF_ID[24:20]),
    .Rd_ID_EX (instruction_11_7_ID_EX),
    .MemRead_ID_EX (mem_read_ID_EX),
    .Stall (Stall),
    .PCWrite (PCWrite),
    .Write_IF_ID (Write_IF_ID)
 );
+
 wire [9:0] control_signals;
-assign wire jump1 = control_signals[9];
-assign wire reg_write1 = control_signals[8];
-assign wire alu_src1 = control_signals[7];
-assign wire mem_write1 = control_signals[6];
-assign wire mem_2_reg1 = control_signals[5];
-assign wire mem_read1 = control_signals[4];
-assign wire branch1 = control_signals[3];
-assign wire reg_dst1 = control_signals[2];
-assign wire [1:0] alu_op1 = control_signals[1:0];
+wire jump1;
+wire reg_write1;
+wire alu_src1;
+wire mem_write1;
+wire mem_2_reg1;
+wire mem_read1;
+wire branch1;
+wire reg_dst1;
+wire [1:0] alu_op1;
 
 mux_2 #(
    .DATA_W(10)
-) regfile_data_mux (
+) control_mux (
    .input_a  ( 10'b0 ),
    .input_b  ({jump, reg_write, alu_src, 
                mem_write, mem_2_reg, mem_read, 
                branch, reg_dst, alu_op}      ),
-   .select_a (Stall    ),
+   .select_a (Stall),
    .mux_out  ( control_signals )
+);
+
+assign jump1 = control_signals[9];
+assign reg_write1 = control_signals[8];
+assign alu_src1 = control_signals[7];
+assign mem_write1 = control_signals[6];
+assign mem_2_reg1 = control_signals[5];
+assign mem_read1 = control_signals[4];
+assign branch1 = control_signals[3];
+assign reg_dst1 = control_signals[2];
+assign alu_op1 = control_signals[1:0];
+
+branch_unit#(
+   .DATA_W(64)
+)branch_unit(
+   .updated_pc         (updated_pc_IF_ID        ),
+   .immediate_extended (immediate_extended),
+   .branch_pc          (branch_pc         ),
+   .jump_pc            (jump_pc           )
 );
 
 // ID STAGE END
@@ -235,7 +274,6 @@ reg_arstn_en#(
 );
 
 // ID_EX Pipeline register for instruction_11_7
-wire [4:0] instruction_11_7_ID_EX;
 reg_arstn_en#(
    .DATA_W(5) // width of the forwarded signal
 )signal_pipe_instruction_11_7_ID_EX(
@@ -377,7 +415,6 @@ reg_arstn_en#(
 );
 
 // ID_EX Pipeline register for mem_read
-wire mem_read_ID_EX;
 reg_arstn_en#(
    .DATA_W(1) // width of the forwarded signal
 )signal_pipe_mem_read_ID_EX(
@@ -426,7 +463,7 @@ reg_arstn_en#(
 //// EX STAGE BEGIN
 
 wire [1:0] Forward_1;
-wire [1:0] Forward2;
+wire [1:0] Forward_2;
 wire [63:0] mux_1_out;
 wire [63:0] mux_2_out;
 
@@ -477,7 +514,7 @@ alu#(
    .alu_in_1 (mux_2_out   ),
    .alu_ctrl (alu_control     ),
    .alu_out  (alu_out         ),
-   .zero_flag(zero_flag       ),
+   .zero_flag(zero_flag_old       ),
    .overflow (                )
 );
 
@@ -489,14 +526,7 @@ alu_control alu_ctrl(
    .alu_control   (alu_control       )
 );
 
-branch_unit#(
-   .DATA_W(64)
-)branch_unit(
-   .updated_pc         (updated_pc_ID_EX        ),
-   .immediate_extended (immediate_extended_ID_EX),
-   .branch_pc          (branch_pc         ),
-   .jump_pc            (jump_pc           )
-);
+
 
 //// EX STAGE END
 
@@ -536,38 +566,16 @@ reg_arstn_en#(
    .dout   (alu_out_EX_MEM)
 );
 
-// EX_MEM Pipeline register for branch_pc
-reg_arstn_en#(
-   .DATA_W(64) // width of the forwarded signal
-)signal_pipe_branch_pc_EX_MEM(
-   .clk     (clk           ),
-   .arst_n  (arst_n        ),
-   .din     (branch_pc),
-   .en      (enable        ),
-   .dout   (branch_pc_EX_MEM)
-);
-
-// EX_MEM Pipeline register for jump_pc
-reg_arstn_en#(
-   .DATA_W(64) // width of the forwarded signal
-)signal_pipe_jump_pc_EX_MEM(
-   .clk     (clk           ),
-   .arst_n  (arst_n        ),
-   .din     (jump_pc),
-   .en      (enable        ),
-   .dout   (jump_pc_EX_MEM)
-);
-
 // EX_MEM Pipeline register for zero_flag
-wire zero_flag_EX_MEM;
+wire zero_flag_old_EX_MEM;
 reg_arstn_en#(
    .DATA_W(1) // width of the forwarded signal
 )signal_pipe_zero_flag_EX_MEM(
    .clk     (clk           ),
    .arst_n  (arst_n        ),
-   .din     (zero_flag),
+   .din     (zero_flag_old),
    .en      (enable        ),
-   .dout   (zero_flag_EX_MEM)
+   .dout   (zero_flag_old_EX_MEM)
 );
 
 // EX_MEM Pipeline register for jump
